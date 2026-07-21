@@ -2,20 +2,21 @@
 <html lang="uz">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>YMAAT — Tizimga ulanish uchun ariza</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
-            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #312e81 100%);
-            --card-bg: rgba(255, 255, 255, 0.88);
-            --card-border: rgba(255, 255, 255, 0.4);
-            --text-main: #0f172a;
-            --text-sub: #64748b;
-            --primary: #2563eb;
-            --primary-hover: #1d4ed8;
-            --accent-glow: rgba(37, 99, 235, 0.25);
-            --success: #059669;
+            --primary-color: #1b365d;
+            --primary-hover: #142844;
+            --bg-color: #f4f6f9;
+            --card-bg: #ffffff;
+            --text-main: #111827;
+            --text-muted: #6b7280;
+            --border-color: #e5e7eb;
+            --step-active: #1b365d;
+            --step-inactive: #e5e7eb;
+            --step-text-inactive: #9ca3af;
         }
 
         * {
@@ -23,14 +24,12 @@
             margin: 0;
             padding: 0;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            -webkit-tap-highlight-color: transparent;
         }
 
         body {
-            background: var(--bg-gradient);
-            background-attachment: fixed;
+            background-color: var(--bg-color);
             color: var(--text-main);
-            padding: 16px 12px;
+            padding: 16px;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -39,540 +38,590 @@
 
         .container {
             width: 100%;
-            max-width: 460px;
+            max-width: 480px;
             background: var(--card-bg);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid var(--card-border);
-            border-radius: 24px;
-            padding: 24px 20px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.2) inset;
+            border-radius: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            padding: 24px;
             position: relative;
-            overflow: hidden;
         }
 
-        /* Top Logo Pill */
-        .top-logo {
-            text-align: center;
-            margin-bottom: 10px;
+        /* Header Logo */
+        .brand-header {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
         }
-        .top-logo span {
-            display: inline-flex;
+        .brand-badge {
+            background: #eef2f7;
+            color: var(--primary-color);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            display: flex;
             align-items: center;
             gap: 6px;
-            background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
-            color: #1e40af;
-            padding: 5px 14px;
-            border-radius: 30px;
-            font-size: 11px;
-            font-weight: 700;
-            letter-spacing: 0.8px;
-            box-shadow: 0 2px 5px rgba(37, 99, 235, 0.1);
         }
 
-        .header {
+        .title-block {
             text-align: center;
-            margin-bottom: 22px;
+            margin-bottom: 24px;
         }
-        .header h1 {
-            font-size: 19px;
-            font-weight: 800;
+        .title-block h1 {
+            font-size: 20px;
+            font-weight: 700;
             color: var(--text-main);
-            letter-spacing: -0.3px;
+            margin-bottom: 4px;
         }
-        .header p {
-            font-size: 12px;
-            color: var(--text-sub);
-            margin-top: 3px;
-            font-weight: 500;
+        .title-block p {
+            font-size: 13px;
+            color: var(--text-muted);
         }
 
-        /* 5 Etap Progress Bar */
+        /* Steps Bar (5 qadamli indikator) */
         .steps-container {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 24px;
+            margin-bottom: 28px;
             position: relative;
-            padding: 0 4px;
         }
-
         .steps-container::before {
             content: '';
             position: absolute;
-            top: 15px;
-            left: 25px;
-            right: 25px;
-            height: 3px;
-            background: #e2e8f0;
+            top: 16px;
+            left: 20px;
+            right: 20px;
+            height: 2px;
+            background: var(--border-color);
             z-index: 1;
-            border-radius: 2px;
         }
-
         .step-item {
             position: relative;
             z-index: 2;
             display: flex;
             flex-direction: column;
             align-items: center;
+            gap: 6px;
         }
-
         .step-circle {
-            width: 32px;
-            height: 32px;
+            width: 34px;
+            height: 34px;
             border-radius: 50%;
-            background: #f1f5f9;
-            color: #94a3b8;
-            font-size: 12px;
-            font-weight: 700;
+            background: var(--step-inactive);
+            color: var(--step-text-inactive);
             display: flex;
             justify-content: center;
             align-items: center;
-            border: 2px solid #e2e8f0;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .step-text {
-            font-size: 10px;
-            color: var(--text-sub);
-            margin-top: 5px;
+            font-size: 14px;
             font-weight: 600;
+            transition: all 0.3s ease;
         }
-
         .step-item.active .step-circle {
-            background: var(--primary);
-            color: #fff;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 5px var(--accent-glow);
-            transform: scale(1.05);
+            background: var(--step-active);
+            color: #ffffff;
+            box-shadow: 0 0 0 4px rgba(27, 54, 93, 0.15);
         }
-        .step-item.active .step-text {
-            color: var(--primary);
-            font-weight: 800;
-        }
-
         .step-item.completed .step-circle {
-            background: var(--success);
-            color: #fff;
-            border-color: var(--success);
+            background: #10b981;
+            color: #ffffff;
+        }
+        .step-label {
+            font-size: 11px;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+        .step-item.active .step-label {
+            color: var(--primary-color);
+            font-weight: 700;
         }
 
-        /* Form Steps animation */
+        /* Form Sections */
         .form-step {
             display: none;
-            animation: fadeIn 0.35s ease-in-out forwards;
         }
-        .form-step.active-step {
+        .form-step.active {
             display: block;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(8px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .card-title {
+        .section-title {
             font-size: 16px;
             font-weight: 700;
+            margin-bottom: 4px;
             color: var(--text-main);
-            margin-bottom: 3px;
         }
-        .card-desc {
+        .section-desc {
             font-size: 12px;
-            color: var(--text-sub);
-            margin-bottom: 16px;
+            color: var(--text-muted);
+            margin-bottom: 20px;
         }
 
         .form-group {
-            margin-bottom: 14px;
+            margin-bottom: 16px;
         }
         .form-group label {
             display: block;
-            font-size: 12px;
-            font-weight: 700;
-            margin-bottom: 5px;
-            color: #334155;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-main);
+            margin-bottom: 6px;
         }
-
         .input-wrapper {
             position: relative;
         }
-
-        .input-wrapper input {
+        .form-control {
             width: 100%;
             padding: 12px 14px;
-            background: #f8fafc;
-            border: 1px solid #cbd5e1;
-            border-radius: 12px;
-            color: var(--text-main);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
             font-size: 14px;
-            outline: none;
-            transition: all 0.2s ease;
-        }
-
-        .input-wrapper input:focus {
+            color: var(--text-main);
             background: #fff;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 4px var(--accent-glow);
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(27, 54, 93, 0.08);
+        }
+        .input-counter {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 12px;
+            color: var(--text-muted);
         }
 
-        .helper-text {
-            font-size: 11px;
-            color: var(--text-sub);
-            margin-top: 4px;
-            font-weight: 500;
+        /* File Upload Box (4-qadam uchun) */
+        .file-upload-box {
+            border: 2px dashed var(--border-color);
+            border-radius: 12px;
+            padding: 24px;
+            text-align: center;
+            background: #fafbfc;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+        .file-upload-box:hover {
+            border-color: var(--primary-color);
+        }
+        .file-upload-box input {
+            display: none;
+        }
+        .file-upload-icon {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+        .file-name-display {
+            margin-top: 8px;
+            font-size: 13px;
+            color: var(--primary-color);
+            font-weight: 600;
         }
 
-        /* Buttons Layout */
+        /* Summary Review (5-qadam uchun) */
+        .summary-card {
+            background: #f8fafc;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 16px;
+            max-height: 280px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+        }
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            padding: 6px 0;
+            border-bottom: 1px solid #edf2f7;
+        }
+        .summary-item:last-child {
+            border-bottom: none;
+        }
+        .summary-label {
+            color: var(--text-muted);
+        }
+        .summary-value {
+            font-weight: 600;
+            color: var(--text-main);
+            text-align: right;
+        }
+
+        /* Buttons */
         .btn-container {
             display: flex;
             gap: 10px;
-            margin-top: 22px;
+            margin-top: 24px;
         }
-
         .btn {
-            width: 100%;
+            flex: 1;
             padding: 13px;
-            border: none;
-            border-radius: 12px;
+            border-radius: 10px;
             font-size: 14px;
-            font-weight: 700;
+            font-weight: 600;
             cursor: pointer;
-            transition: all 0.2s ease;
+            border: none;
+            transition: background 0.2s;
         }
-
         .btn-primary {
-            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            background: var(--primary-color);
             color: white;
-            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
         }
-        .btn-primary:active {
-            transform: scale(0.98);
+        .btn-primary:hover {
+            background: var(--primary-hover);
         }
-
         .btn-secondary {
-            background: #e2e8f0;
-            color: #475569;
-            width: 42%;
+            background: #e5e7eb;
+            color: var(--text-main);
         }
-        .btn-secondary:active {
-            transform: scale(0.98);
-        }
-
-        .summary-card {
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
-            padding: 14px;
-            border-radius: 12px;
-            font-size: 12px;
-            line-height: 1.7;
-            margin-bottom: 16px;
-            color: #334155;
-        }
-        .summary-card b {
-            color: #1e293b;
+        .btn-secondary:hover {
+            background: #d1d5db;
         }
 
+        /* Footer info */
         .footer-note {
             text-align: center;
-            font-size: 10px;
-            color: var(--text-sub);
-            margin-top: 18px;
-            font-weight: 600;
-            letter-spacing: 0.3px;
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 16px;
         }
 
-        /* Success Overlay Screen */
-        .success-overlay {
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(255, 255, 255, 0.97);
-            backdrop-filter: blur(10px);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s ease;
-            z-index: 99;
-            border-radius: 24px;
+        /* Success Screen */
+        .success-screen {
+            display: none;
+            text-align: center;
+            padding: 30px 10px;
         }
-        .success-overlay.active {
-            opacity: 1;
-            pointer-events: all;
-        }
-        .checkmark-circle {
-            width: 75px;
-            height: 75px;
-            background: var(--success);
+        .success-icon-box {
+            width: 70px;
+            height: 70px;
+            background: #10b981;
+            color: white;
             border-radius: 50%;
             display: flex;
             justify-content: center;
             align-items: center;
-            box-shadow: 0 10px 25px rgba(5, 150, 105, 0.4);
-            animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            font-size: 36px;
+            margin: 0 auto 16px auto;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
         }
-        .checkmark-circle svg {
-            width: 40px;
-            height: 40px;
-            fill: none;
-            stroke: #fff;
-            stroke-width: 3.5;
-            stroke-linecap: round;
-            stroke-linejoin: round;
+        .success-screen h2 {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--text-main);
         }
-        .success-title {
-            font-size: 18px;
-            font-weight: 800;
-            margin-top: 16px;
-            color: #0f172a;
-        }
-        .success-sub {
-            font-size: 12px;
-            color: var(--text-sub);
-            margin-top: 4px;
-            font-weight: 500;
-        }
-
-        @keyframes popIn {
-            0% { transform: scale(0); }
-            100% { transform: scale(1); }
+        .success-screen p {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 24px;
         }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <!-- Success Overlay -->
-    <div class="success-overlay" id="successOverlay">
-        <div class="checkmark-circle">
-            <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
+    <!-- Brand Header -->
+    <div class="brand-header">
+        <div class="brand-badge">
+            🏢 YMAAT
         </div>
-        <div class="success-title">Ariza Muvaffaqiyatli Yuborildi!</div>
-        <div class="success-sub">Tez orada ko'rib chiqiladi.</div>
     </div>
 
-    <div class="top-logo">
-        <span>🏛️ YMAAT</span>
-    </div>
-
-    <div class="header">
+    <div class="title-block" id="mainTitleBlock">
         <h1>Tizimga ulanish uchun ariza</h1>
         <p>Yagona milliy arxiv axborot tizimi</p>
     </div>
 
-    <!-- 5 Etap (Steps Indicator) -->
-    <div class="steps-container">
-        <div class="step-item active" id="indicator-1">
+    <!-- 5 Qadamlik Stepper -->
+    <div class="steps-container" id="stepperBar">
+        <div class="step-item active" id="sIndicator1">
             <div class="step-circle">1</div>
-            <div class="step-text">Tashkilot</div>
+            <div class="step-label">Tashkilot</div>
         </div>
-        <div class="step-item" id="indicator-2">
+        <div class="step-item" id="sIndicator2">
             <div class="step-circle">2</div>
-            <div class="step-text">Rahbar</div>
+            <div class="step-label">Rahbar</div>
         </div>
-        <div class="step-item" id="indicator-3">
+        <div class="step-item" id="sIndicator3">
             <div class="step-circle">3</div>
-            <div class="step-text">Mas'ul</div>
+            <div class="step-label">Mas'ul</div>
         </div>
-        <div class="step-item" id="indicator-4">
+        <div class="step-item" id="sIndicator4">
             <div class="step-circle">4</div>
-            <div class="step-text">Ilova</div>
+            <div class="step-label">Ilova</div>
         </div>
-        <div class="step-item" id="indicator-5">
+        <div class="step-item" id="sIndicator5">
             <div class="step-circle">5</div>
-            <div class="step-text">Tasdiq</div>
+            <div class="step-label">Tasdiq</div>
         </div>
     </div>
 
+    <!-- FORMMA -->
     <form id="arizaForm">
-        <!-- ETAP 1: Tashkilot -->
-        <div class="form-step active-step" id="step-1">
-            <div class="card-title">Tashkilot to'g'risida</div>
-            <div class="card-desc">Ariza beruvchi davlat organi yoki tashkiloti</div>
-            
+        
+        <!-- QADAM 1: Tashkilot -->
+        <div class="form-step active" id="step1">
+            <div class="section-title">Tashkilot to'g'risida</div>
+            <div class="section-desc">Ariza beruvchi davlat organi yoki tashkiloti</div>
+
             <div class="form-group">
                 <label>Tashkilot nomi *</label>
-                <div class="input-wrapper"><input type="text" id="tashkilotNomi" placeholder="Masalan: Adliya vazirligi" required></div>
+                <input type="text" class="form-control" id="tashkilotNomi" placeholder="Masalan: Adliya vazirligi" required>
             </div>
+
             <div class="form-group">
                 <label>Tashkilot STIR raqami *</label>
-                <div class="input-wrapper"><input type="text" id="stirRaqami" maxlength="9" placeholder="123456789" required></div>
+                <div class="input-wrapper">
+                    <input type="text" class="form-control" id="stirRaqami" placeholder="123456789" maxlength="9" required>
+                    <span class="input-counter" id="stirCounter">0/9</span>
+                </div>
             </div>
+
             <div class="form-group">
                 <label>Telefon raqami *</label>
-                <div class="input-wrapper"><input type="tel" id="telefonRaqami" value="+998" required></div>
+                <input type="text" class="form-control" id="telefonRaqami" placeholder="+998 90 123 45 67" required>
             </div>
+
             <div class="form-group">
                 <label>Tizimdan foydalanuvchilar soni *</label>
-                <div class="input-wrapper"><input type="number" id="foydalanuvchilarSoni" placeholder="5" required></div>
-                <div class="helper-text">Tizimda ishlaydigan xodimlar soni</div>
+                <input type="number" class="form-control" id="foydalanuvchilarSoni" placeholder="5" required>
+                <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Tizimda ishlaydigan xodimlar soni</div>
             </div>
 
-            <button type="button" class="btn btn-primary" onclick="nextStep(1)">Keyingi ➔</button>
+            <div class="btn-container">
+                <button type="button" class="btn btn-primary" onclick="nextStep(1)">Keyingi &rarr;</button>
+            </div>
         </div>
 
-        <!-- ETAP 2: Rahbar -->
-        <div class="form-step" id="step-2">
-            <div class="card-title">Rahbar ma'lumotlari</div>
-            <div class="card-desc">Tashkilot rahbarining shaxsiy ma'lumotlari</div>
-            
+        <!-- QADAM 2: Rahbar -->
+        <div class="form-step" id="step2">
+            <div class="section-title">Rahbar ma'lumotlari</div>
+            <div class="section-desc">Tashkilot rahbarining shaxsiy ma'lumotlari</div>
+
             <div class="form-group">
                 <label>Rahbar F.I.O. *</label>
-                <div class="input-wrapper"><input type="text" id="rahbarFio" placeholder="Ism Familiya Sharif" required></div>
+                <input type="text" class="form-control" id="rahbarFio" placeholder="F.I.O. ni to'liq kiriting">
             </div>
+
             <div class="form-group">
                 <label>Rahbar lavozimi *</label>
-                <div class="input-wrapper"><input type="text" id="rahbarLavozimi" placeholder="Masalan: Vazir / Direktor" required></div>
+                <input type="text" class="form-control" id="rahbarLavozimi" placeholder="Masalan: Direktor / Boshliq">
             </div>
+
             <div class="form-group">
-                <label>Rahbar JSHSHIR (14 ta raqam) *</label>
-                <div class="input-wrapper"><input type="text" id="rahbarJshshir" maxlength="14" placeholder="12345678901234" required></div>
+                <label>Rahbar JSHSHIR *</label>
+                <div class="input-wrapper">
+                    <input type="text" class="form-control" id="rahbarJshshir" placeholder="14 ta raqam" maxlength="14">
+                    <span class="input-counter" id="jshshirCounter">0/14</span>
+                </div>
             </div>
 
             <div class="btn-container">
-                <button type="button" class="btn btn-secondary" onclick="prevStep(2)">⬅️ Orqaga</button>
-                <button type="button" class="btn btn-primary" onclick="nextStep(2)">Keyingi ➔</button>
+                <button type="button" class="btn btn-secondary" onclick="prevStep(2)">&larr; Orqaga</button>
+                <button type="button" class="btn btn-primary" onclick="nextStep(2)">Keyingi &rarr;</button>
             </div>
         </div>
 
-        <!-- ETAP 3: Mas'ul -->
-        <div class="form-step" id="step-3">
-            <div class="card-title">Mas'ul xodim ma'lumotlari</div>
-            <div class="card-desc">Tizim uchun mas'ul etib belgilangan xodim</div>
-            
+        <!-- QADAM 3: Mas'ul -->
+        <div class="form-step" id="step3">
+            <div class="section-title">Mas'ul xodim ma'lumotlari</div>
+            <div class="section-desc">Tizim bilan ishlaydigan mas'ul shaxs</div>
+
             <div class="form-group">
                 <label>Mas'ul xodim F.I.O. *</label>
-                <div class="input-wrapper"><input type="text" id="masulFio" placeholder="Ism Familiya Sharif" required></div>
+                <input type="text" class="form-control" id="masulFio" placeholder="F.I.O. ni to'liq kiriting">
             </div>
+
             <div class="form-group">
-                <label>Mas'ul xodim lavozimi *</label>
-                <div class="input-wrapper"><input type="text" id="masulLavozimi" placeholder="Masalan: Bo'lim boshlig'i" required></div>
+                <label>Mas'ul lavozimi *</label>
+                <input type="text" class="form-control" id="masulLavozimi" placeholder="Masalan: Bo'lim boshlig'i">
             </div>
+
             <div class="form-group">
-                <label>Mas'ul JSHSHIR (14 ta raqam) *</label>
-                <div class="input-wrapper"><input type="text" id="masulJshshir" maxlength="14" placeholder="12345678901234" required></div>
+                <label>Mas'ul JSHSHIR *</label>
+                <input type="text" class="form-control" id="masulJshshir" placeholder="14 ta raqam" maxlength="14">
             </div>
 
             <div class="btn-container">
-                <button type="button" class="btn btn-secondary" onclick="prevStep(3)">⬅️ Orqaga</button>
-                <button type="button" class="btn btn-primary" onclick="nextStep(3)">Keyingi ➔</button>
+                <button type="button" class="btn btn-secondary" onclick="prevStep(3)">&larr; Orqaga</button>
+                <button type="button" class="btn btn-primary" onclick="nextStep(3)">Keyingi &rarr;</button>
             </div>
         </div>
 
-        <!-- ETAP 4: Ilova -->
-        <div class="form-step" id="step-4">
-            <div class="card-title">Qo'shimcha ma'lumot / Ilova</div>
-            <div class="card-desc">Asoslovchi hujjat yoki izoh qoldiring</div>
-            
+        <!-- QADAM 4: Ilova (Fayl / Foto / Matn yuklash) -->
+        <div class="form-step" id="step4">
+            <div class="section-title">Ilova hujjatini yuklash</div>
+            <div class="section-desc">Tasdiqlovchi rasmiy xat yoki buyruq faylini yuklang</div>
+
             <div class="form-group">
-                <label>Buyruq raqami va sanasi</label>
-                <div class="input-wrapper"><input type="text" id="qoshimchaIzoh" placeholder="Masalan: 12-son, 20.05.2026 y."></div>
+                <label>Hujjat (PDF, Foto yoki Word) *</label>
+                <div class="file-upload-box" onclick="document.getElementById('fileInput').click()">
+                    <div class="file-upload-icon">&#128194;</div>
+                    <div style="font-size: 13px; font-weight: 600; color: var(--primary-color);">Faylni tanlash uchun bosing</div>
+                    <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">PNG, JPG, PDF (Maks: 10MB)</div>
+                    <div class="file-name-display" id="fileNameDisplay">Fayl tanlanmagan</div>
+                </div>
+                <input type="file" id="fileInput" onchange="handleFileSelect(event)">
+            </div>
+
+            <div class="form-group">
+                <label>Qo'shimcha izoh yoki matn</label>
+                <textarea class="form-control" id="qoshimchaMatn" placeholder="Zarur bo'lsa qo'shimcha ma'lumot yozing..." rows="3"></textarea>
             </div>
 
             <div class="btn-container">
-                <button type="button" class="btn btn-secondary" onclick="prevStep(4)">⬅️ Orqaga</button>
-                <button type="button" class="btn btn-primary" onclick="nextStep(4)">Keyingi ➔</button>
+                <button type="button" class="btn btn-secondary" onclick="prevStep(4)">&larr; Orqaga</button>
+                <button type="button" class="btn btn-primary" onclick="nextStep(4)">Ko'rib chiqish &rarr;</button>
             </div>
         </div>
 
-        <!-- ETAP 5: Tasdiq -->
-        <div class="form-step" id="step-5">
-            <div class="card-title">Ma'lumotlarni tasdiqlash</div>
-            <div class="card-desc">Kiritilgan barcha ma'lumotlar to'g'riligini tekshiring</div>
-            
-            <div class="summary-card" id="summaryBox">
-                <!-- JS orqali to'ldiriladi -->
+        <!-- QADAM 5: Tasdiqlash (Barcha ma'lumotlarni tekshirish) -->
+        <div class="form-step" id="step5">
+            <div class="section-title">Ma'lumotlarni tasdiqlash</div>
+            <div class="section-desc">Kiritilgan ma'lumotlarning to'g'riligini tekshiring</div>
+
+            <div class="summary-card" id="summaryContainer">
+                <!-- JavaScript orqali to'ldiriladi -->
             </div>
 
             <div class="btn-container">
-                <button type="button" class="btn btn-secondary" onclick="prevStep(5)">⬅️ Orqaga</button>
-                <button type="submit" class="btn btn-primary" style="background: linear-gradient(135deg, #059669 0%, #047857 100%); box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);">Tasdiqlash va Yuborish 🚀</button>
+                <button type="button" class="btn btn-secondary" onclick="prevStep(5)">&larr; O'zgartirish</button>
+                <button type="button" class="btn btn-primary" onclick="submitAriza()">Ariza topshirish &check;</button>
             </div>
         </div>
+
     </form>
+
+    <!-- SUCCESS SCREEN (Ariza topshirilganda chiqadigan galochkali oyna) -->
+    <div class="success-screen" id="successScreen">
+        <div class="success-icon-box">&check;</div>
+        <h2>Ariza muvaffaqiyatli topshirildi!</h2>
+        <p>Arizangiz ko'rib chiqish uchun adminga yuborildi. Tez orada javob beriladi.</p>
+        <button type="button" class="btn btn-primary" onclick="closeWebApp()">Yopish</button>
+    </div>
 
     <div class="footer-note">PF-228 va VM 352-son qarori ijrosi</div>
 </div>
 
 <script>
-    const tg = window.Telegram.WebApp;
-    tg.expand();
+    let currentStep = 1;
+    let uploadedFile = null;
+
+    // STIR counter
+    const stirInput = document.getElementById('stirRaqami');
+    stirInput.addEventListener('input', (e) => {
+        document.getElementById('stirCounter').innerText = e.target.value.length + '/9';
+    });
+
+    const jshshirInput = document.getElementById('rahbarJshshir');
+    jshshirInput.addEventListener('input', (e) => {
+        document.getElementById('jshshirCounter').innerText = e.target.value.length + '/14';
+    });
+
+    function handleFileSelect(event) {
+        const file = event.target.files[0];
+        if (file) {
+            uploadedFile = file.name;
+            document.getElementById('fileNameDisplay').innerText = "Tanlandi: " + file.name;
+        }
+    }
+
+    function updateStepper() {
+        for (let i = 1; i <= 5; i++) {
+            const indicator = document.getElementById('sIndicator' + i);
+            indicator.classList.remove('active', 'completed');
+            if (i < currentStep) {
+                indicator.classList.add('completed');
+                indicator.querySelector('.step-circle').innerHTML = '&check;';
+            } else if (i === currentStep) {
+                indicator.classList.add('active');
+                indicator.querySelector('.step-circle').innerHTML = i;
+            } else {
+                indicator.querySelector('.step-circle').innerHTML = i;
+            }
+        }
+    }
 
     function nextStep(step) {
+        // Oddiy validatsiya
         if (step === 1) {
-            if (!document.getElementById('tashkilotNomi').value || !document.getElementById('stirRaqami').value) {
-                alert("Iltimos, tashkilot nomi va STIR raqamini kiriting!");
+            if (!document.getElementById('tashkilotNomi').value || 
+                !document.getElementById('stirRaqami').value || 
+                !document.getElementById('telefonRaqami').value) {
+                alert("Iltimos, barcha majburiy maydonlarni to'ldiring!");
                 return;
             }
         }
-        
-        document.getElementById(`step-${step}`).classList.remove('active-step');
-        document.getElementById(`indicator-${step}`).classList.remove('active');
-        document.getElementById(`indicator-${step}`).classList.add('completed');
 
-        let currentStep = step + 1;
-        document.getElementById(`step-${currentStep}`).classList.add('active-step');
-        document.getElementById(`indicator-${currentStep}`).classList.add('active');
-
-        if (currentStep === 5) {
-            fillSummary();
+        if (step === 4) {
+            // 5-qadamga o'tishdan oldin summary'ni shakllantirish
+            generateSummary();
         }
-        window.scrollTo(0, 0);
+
+        document.getElementById('step' + currentStep).classList.remove('active');
+        currentStep++;
+        document.getElementById('step' + currentStep).classList.add('active');
+        updateStepper();
     }
 
     function prevStep(step) {
-        document.getElementById(`step-${step}`).classList.remove('active-step');
-        document.getElementById(`indicator-${step}`).classList.remove('active');
-
-        let currentStep = step - 1;
-        document.getElementById(`step-${currentStep}`).classList.remove('completed');
-        document.getElementById(`step-${currentStep}`).classList.add('active-step');
-        document.getElementById(`indicator-${currentStep}`).classList.add('active');
-        window.scrollTo(0, 0);
+        document.getElementById('step' + currentStep).classList.remove('active');
+        currentStep--;
+        document.getElementById('step' + currentStep).classList.add('active');
+        updateStepper();
     }
 
-    function fillSummary() {
-        const summary = `
-            <b>Tashkilot:</b> ${document.getElementById('tashkilotNomi').value}<br>
-            <b>STIR:</b> ${document.getElementById('stirRaqami').value}<br>
-            <b>Telefon:</b> ${document.getElementById('telefonRaqami').value}<br>
-            <b>Rahbar:</b> ${document.getElementById('rahbarFio').value}<br>
-            <b>Mas'ul:</b> ${document.getElementById('masulFio').value}
+    function generateSummary() {
+        const container = document.getElementById('summaryContainer');
+        container.innerHTML = `
+            <div class="summary-item"><span class="summary-label">Tashkilot nomi:</span><span class="summary-value">${document.getElementById('tashkilotNomi').value}</span></div>
+            <div class="summary-item"><span class="summary-label">STIR:</span><span class="summary-value">${document.getElementById('stirRaqami').value}</span></div>
+            <div class="summary-item"><span class="summary-label">Telefon:</span><span class="summary-value">${document.getElementById('telefonRaqami').value}</span></div>
+            <div class="summary-item"><span class="summary-label">Xodimlar soni:</span><span class="summary-value">${document.getElementById('foydalanuvchilarSoni').value}</span></div>
+            <div class="summary-item"><span class="summary-label">Rahbar FIO:</span><span class="summary-value">${document.getElementById('rahbarFio').value || '-'}</span></div>
+            <div class="summary-item"><span class="summary-label">Rahbar lavozimi:</span><span class="summary-value">${document.getElementById('rahbarLavozimi').value || '-'}</span></div>
+            <div class="summary-item"><span class="summary-label">Rahbar JSHSHIR:</span><span class="summary-value">${document.getElementById('rahbarJshshir').value || '-'}</span></div>
+            <div class="summary-item"><span class="summary-label">Mas'ul FIO:</span><span class="summary-value">${document.getElementById('masulFio').value || '-'}</span></div>
+            <div class="summary-item"><span class="summary-label">Mas'ul lavozimi:</span><span class="summary-value">${document.getElementById('masulLavozimi').value || '-'}</span></div>
+            <div class="summary-item"><span class="summary-label">Mas'ul JSHSHIR:</span><span class="summary-value">${document.getElementById('masulJshshir').value || '-'}</span></div>
+            <div class="summary-item"><span class="summary-label">Yuklangan fayl:</span><span class="summary-value">${uploadedFile || 'Yo\'q'}</span></div>
         `;
-        document.getElementById('summaryBox').innerHTML = summary;
     }
 
-    const form = document.getElementById('arizaForm');
-    const successOverlay = document.getElementById('successOverlay');
+    function submitAriza() {
+        // Formani yashirish
+        document.getElementById('arizaForm').style.display = 'none';
+        document.getElementById('stepperBar').style.display = 'none';
+        document.getElementById('mainTitleBlock').style.display = 'none';
+        
+        // Muvaffaqiyatli oynani ko'rsatish
+        document.getElementById('successScreen').style.display = 'block';
 
-    form.addEventListener('submit', function(e) {
-        e.preventDefault();
-
-        const payload = {
-            tashkilotNomi: document.getElementById('tashkilotNomi').value,
-            stirRaqami: document.getElementById('stirRaqami').value,
-            telefonRaqami: document.getElementById('telefonRaqami').value,
-            foydalanuvchilarSoni: document.getElementById('foydalanuvchilarSoni').value,
-            rahbarFio: document.getElementById('rahbarFio').value,
-            rahbarLavozimi: document.getElementById('rahbarLavozimi').value,
-            rahbarJshshir: document.getElementById('rahbarJshshir').value,
-            masulFio: document.getElementById('masulFio').value,
-            masulLavozimi: document.getElementById('masulLavozimi').value,
-            masulJshshir: document.getElementById('masulJshshir').value,
-            qoshimchaIzoh: document.getElementById('qoshimchaIzoh').value
-        };
-
-        successOverlay.classList.add('active');
-        if (tg.HapticFeedback) {
-            tg.HapticFeedback.notificationOccurred('success');
+        // Telegram WebApp orqali ma'lumotlarni botga yuborish (agar Telegram ichida ochilgan bo'lsa)
+        if (window.Telegram && window.Telegram.WebApp) {
+            const tg = window.Telegram.WebApp;
+            tg.sendData(JSON.stringify({
+                tashkilotNomi: document.getElementById('tashkilotNomi').value,
+                stir: document.getElementById('stirRaqami').value,
+                telefon: document.getElementById('telefonRaqami').value
+            }));
         }
+    }
 
-        setTimeout(() => {
-            tg.sendData(JSON.stringify(payload));
-        }, 1500);
-    });
+    function closeWebApp() {
+        if (window.Telegram && window.Telegram.WebApp) {
+            window.Telegram.WebApp.close();
+        } else {
+            alert("Ariza yuborildi!");
+        }
+    }
 </script>
+
 </body>
 </html>
