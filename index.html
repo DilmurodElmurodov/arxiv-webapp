@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Milliy Arxiv — Rasmiy Ariza Formasi</title>
+    <!-- Telegram WebApp SDK -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --border-color: rgba(255, 255, 255, 0.1);
+            --text-color: #f8fafc;
+            --subtext-color: #94a3b8;
+            --primary-color: #0ea5e9;
+            --primary-hover: #0284c7;
+            --error-color: #ef4444;
+            --success-color: #10b981;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: var(--bg-color);
+            color: var(--text-color);
+            padding: 16px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 480px;
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 24px 20px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .header .icon {
+            font-size: 42px;
+            margin-bottom: 8px;
+        }
+
+        .header h1 {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-color);
+            letter-spacing: -0.02em;
+        }
+
+        .header p {
+            font-size: 13px;
+            color: var(--subtext-color);
+            margin-top: 4px;
+        }
+
+        .section-title {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--primary-color);
+            margin: 20px 0 10px 0;
+            font-weight: 600;
+        }
+
+        .form-group {
+            margin-bottom: 14px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            margin-bottom: 6px;
+            color: var(--text-color);
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-wrapper input {
+            width: 100%;
+            padding: 12px 14px;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            color: #fff;
+            font-size: 14px;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        .input-wrapper input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.2);
+        }
+
+        .input-wrapper input.error {
+            border-color: var(--error-color);
+        }
+
+        .error-text {
+            font-size: 11px;
+            color: var(--error-color);
+            margin-top: 4px;
+            display: none;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 14px;
+            margin-top: 24px;
+            background: linear-gradient(135deg, var(--primary-color), #0284c7);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s, transform 0.1s;
+            box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
+        }
+
+        .submit-btn:active {
+            transform: scale(0.98);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <div class="icon">🏛️</div>
+        <h1>Milliy Arxiv Xizmati</h1>
+        <p>Elektron ariza topshirish oynasi</p>
+    </div>
+
+    <form id="arizaForm">
+        <div class="section-title">1. Tashkilot Ma'lumotlari</div>
+
+        <div class="form-group">
+            <label for="tashkilotNomi">Tashkilot nomi *</label>
+            <div class="input-wrapper">
+                <input type="text" id="tashkilotNomi" placeholder="Masalan: MCHJ 'Nur-Tekstil'" required>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="stirRaqami">STIR (9 ta raqam) *</label>
+            <div class="input-wrapper">
+                <input type="text" id="stirRaqami" maxlength="9" placeholder="123456789" required>
+            </div>
+            <div class="error-text" id="stirError">STIR 9 ta raqamdan iborat bo'lishi kerak!</div>
+        </div>
+
+        <div class="form-group">
+            <label for="telefonRaqami">Telefon raqam *</label>
+            <div class="input-wrapper">
+                <input type="tel" id="telefonRaqami" value="+998" placeholder="+998901234567" required>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="foydalanuvchilarSoni">Foydalanuvchilar soni *</label>
+            <div class="input-wrapper">
+                <input type="number" id="foydalanuvchilarSoni" placeholder="Masalan: 5" required>
+            </div>
+        </div>
+
+        <div class="section-title">2. Rahbar Ma'lumotlari</div>
+
+        <div class="form-group">
+            <label for="rahbarFio">Rahbar F.I.O. *</label>
+            <div class="input-wrapper">
+                <input type="text" id="rahbarFio" placeholder="Ism Familiya Otasining ismi" required>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="rahbarLavozimi">Rahbar lavozimi *</label>
+            <div class="input-wrapper">
+                <input type="text" id="rahbarLavozimi" placeholder="Masalan: Bosh Direktor" required>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="rahbarJshshir">Rahbar JSHSHIR (14 ta raqam) *</label>
+            <div class="input-wrapper">
+                <input type="text" id="rahbarJshshir" maxlength="14" placeholder="30101901230045" required>
+            </div>
+            <div class="error-text" id="rahbarJshshirError">JSHSHIR 14 ta raqam bo'lishi shart!</div>
+        </div>
+
+        <div class="section-title">3. Mas'ul Xodim Ma'lumotlari</div>
+
+        <div class="form-group">
+            <label for="masulFio">Mas'ul xodim F.I.O. *</label>
+            <div class="input-wrapper">
+                <input type="text" id="masulFio" placeholder="Ism Familiya Otasining ismi" required>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="masulLavozimi">Mas'ul xodim lavozimi *</label>
+            <div class="input-wrapper">
+                <input type="text" id="masulLavozimi" placeholder="Masalan: Arxivchi" required>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="masulJshshir">Mas'ul xodim JSHSHIR (14 ta raqam) *</label>
+            <div class="input-wrapper">
+                <input type="text" id="masulJshshir" maxlength="14" placeholder="30101901230046" required>
+            </div>
+            <div class="error-text" id="masulJshshirError">JSHSHIR 14 ta raqam bo'lishi shart!</div>
+        </div>
+
+        <button type="submit" class="submit-btn" id="submitBtn">Arizani Yuborish 🚀</button>
+    </form>
+</div>
+
+<script>
+    const tg = window.Telegram.WebApp;
+    tg.expand(); // WebApp oynasini to'liq ekranga yoyish
+
+    const form = document.getElementById('arizaForm');
+
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        // Qiymatlarni olish
+        const stir = document.getElementById('stirRaqami').value;
+        const rahbarJshshir = document.getElementById('rahbarJshshir').value;
+        const masulJshshir = document.getElementById('masulJshshir').value;
+
+        let isValid = true;
+
+        // STIR Validation
+        if (!/^\d{9}$/.test(stir)) {
+            document.getElementById('stirRaqami').classList.add('error');
+            document.getElementById('stirError').style.display = 'block';
+            isValid = false;
+        } else {
+            document.getElementById('stirRaqami').classList.remove('error');
+            document.getElementById('stirError').style.display = 'none';
+        }
+
+        // Rahbar JSHSHIR Validation
+        if (!/^\d{14}$/.test(rahbarJshshir)) {
+            document.getElementById('rahbarJshshir').classList.add('error');
+            document.getElementById('rahbarJshshirError').style.display = 'block';
+            isValid = false;
+        } else {
+            document.getElementById('rahbarJshshir').classList.remove('error');
+            document.getElementById('rahbarJshshirError').style.display = 'none';
+        }
+
+        // Mas'ul JSHSHIR Validation
+        if (!/^\d{14}$/.test(masulJshshir)) {
+            document.getElementById('masulJshshir').classList.add('error');
+            document.getElementById('masulJshshirError').style.display = 'block';
+            isValid = false;
+        } else {
+            document.getElementById('masulJshshir').classList.remove('error');
+            document.getElementById('masulJshshirError').style.display = 'none';
+        }
+
+        if (!isValid) {
+            if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('error');
+            return;
+        }
+
+        // Ma'lumotlar obyektini shakllantirish
+        const payload = {
+            tashkilotNomi: document.getElementById('tashkilotNomi').value,
+            stirRaqami: stir,
+            telefonRaqami: document.getElementById('telefonRaqami').value,
+            foydalanuvchilarSoni: document.getElementById('foydalanuvchilarSoni').value,
+            rahbarFio: document.getElementById('rahbarFio').value,
+            rahbarLavozimi: document.getElementById('rahbarLavozimi').value,
+            rahbarJshshir: rahbarJshshir,
+            masulFio: document.getElementById('masulFio').value,
+            masulLavozimi: document.getElementById('masulLavozimi').value,
+            masulJshshir: masulJshshir
+        };
+
+        if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+
+        // Ma'lumotni Telegram Botga uzatish (sendData)
+        tg.sendData(JSON.stringify(payload));
+    });
+</script>
+</body>
+</html>
