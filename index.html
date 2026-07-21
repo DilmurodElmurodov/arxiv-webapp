@@ -46,6 +46,7 @@
             padding: 24px 20px;
             box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
             position: relative;
+            overflow: hidden;
         }
 
         .header {
@@ -99,17 +100,12 @@
             transition: all 0.2s;
         }
 
-        .submit-btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-
         /* Galochka (Success Overlay) Uslubi */
         .success-overlay {
             position: absolute;
             top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(15, 23, 42, 0.95);
-            backdrop-filter: blur(10px);
+            background: rgba(15, 23, 42, 0.96);
+            backdrop-filter: blur(12px);
             border-radius: 20px;
             display: flex;
             flex-direction: column;
@@ -118,7 +114,7 @@
             opacity: 0;
             pointer-events: none;
             transition: opacity 0.3s ease;
-            z-index: 10;
+            z-index: 99;
         }
 
         .success-overlay.active {
@@ -127,20 +123,20 @@
         }
 
         .checkmark-circle {
-            width: 70px;
-            height: 70px;
+            width: 75px;
+            height: 75px;
             background: var(--success-color);
             border-radius: 50%;
             display: flex;
             justify-content: center;
             align-items: center;
-            box-shadow: 0 0 25px rgba(16, 185, 129, 0.5);
+            box-shadow: 0 0 30px rgba(16, 185, 129, 0.6);
             animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
         .checkmark-circle svg {
-            width: 40px;
-            height: 40px;
+            width: 42px;
+            height: 42px;
             fill: none;
             stroke: #fff;
             stroke-width: 3.5;
@@ -177,8 +173,8 @@
                 <polyline points="20 6 9 17 4 12"></polyline>
             </svg>
         </div>
-        <div class="success-title">Ariza Muvaffaqiyatli Yuborildi!</div>
-        <div class="success-sub">Ma'lumotlaringiz qabul qilindi.</div>
+        <div class="success-title">Ariza Qabul Qilindi!</div>
+        <div class="success-sub">Ma'lumotlar saqlanmoqda...</div>
     </div>
 
     <div class="header">
@@ -242,69 +238,38 @@
     const tg = window.Telegram.WebApp;
     tg.expand();
 
-    // SIZNING BOT TOKENINGIZ
-    const BOT_TOKEN = "7963380065:AAG_38I4-yEaC4T71Yx-s6X94gG2QW44H1A"; // O'zingizning bot tokeningizni qo'ying!
-
     const form = document.getElementById('arizaForm');
-    const submitBtn = document.getElementById('submitBtn');
     const successOverlay = document.getElementById('successOverlay');
 
-    form.addEventListener('submit', async function(e) {
+    form.addEventListener('submit', function(e) {
         e.preventDefault();
 
-        submitBtn.disabled = true;
-        submitBtn.innerText = "Yuborilmoqda...";
+        // 1. Ma'lumotlarni JSON shakliga keltirish
+        const payload = {
+            tashkilotNomi: document.getElementById('tashkilotNomi').value,
+            stirRaqami: document.getElementById('stirRaqami').value,
+            telefonRaqami: document.getElementById('telefonRaqami').value,
+            foydalanuvchilarSoni: document.getElementById('foydalanuvchilarSoni').value,
+            rahbarFio: document.getElementById('rahbarFio').value,
+            rahbarLavozimi: document.getElementById('rahbarLavozimi').value,
+            rahbarJshshir: document.getElementById('rahbarJshshir').value,
+            masulFio: document.getElementById('masulFio').value,
+            masulLavozimi: document.getElementById('masulLavozimi').value,
+            masulJshshir: document.getElementById('masulJshshir').value
+        };
 
-        const userId = tg.initDataUnsafe?.user?.id;
+        // 2. Darhol Yashil Galochka Animatsiyasini yoqish
+        successOverlay.classList.add('active');
 
-        // Ma'lumotlarni matn ko'rinishida tayyorlash
-        const messageText = 
-`📥 **Yangi Ariza Kelib Tushdi!**
-
-🏢 **Tashkilot:** ${document.getElementById('tashkilotNomi').value}
-🆔 **STIR:** ${document.getElementById('stirRaqami').value}
-📞 **Tel:** ${document.getElementById('telefonRaqami').value}
-👥 **Foydalanuvchilar:** ${document.getElementById('foydalanuvchilarSoni').value} ta
-
-👤 **Rahbar:** ${document.getElementById('rahbarFio').value} (${document.getElementById('rahbarLavozimi').value})
-🪪 **JSHSHIR:** ${document.getElementById('rahbarJshshir').value}
-
-🛠 **Mas'ul:** ${document.getElementById('masulFio').value} (${document.getElementById('masulLavozimi').value})
-🪪 **JSHSHIR:** ${document.getElementById('masulJshshir').value}`;
-
-        try {
-            // Telegram Bot API orqali xabarni to'g'ridan-to'g'ri foydalanuvchi/admin chatiga yuborish
-            if (userId) {
-                await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        chat_id: userId,
-                        text: messageText,
-                        parse_mode: 'Markdown'
-                    })
-                });
-            } else {
-                // Agar WebApp browserda ochilsa tg.sendData ishlatiladi
-                tg.sendData(messageText);
-            }
-
-            // Haptic Feedback (Vibratsiya)
-            if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
-
-            // Galochka animasiyasini ko'rsatish
-            successOverlay.classList.add('active');
-
-            // 2 soniyadan so'ng WebApp'ni avto yopish
-            setTimeout(() => {
-                tg.close();
-            }, 2000);
-
-        } catch (error) {
-            alert("Xatolik yuz berdi. Qayta urinib ko'ring!");
-            submitBtn.disabled = false;
-            submitBtn.innerText = "Arizani Yuborish 🚀";
+        // 3. Vibratsiya berish
+        if (tg.HapticFeedback) {
+            tg.HapticFeedback.notificationOccurred('success');
         }
+
+        // 4. 1.5 soniyadan so'ng ma'lumotni Telegram botga uzatish va oynani yopish
+        setTimeout(() => {
+            tg.sendData(JSON.stringify(payload));
+        }, 1500);
     });
 </script>
 </body>
