@@ -4,7 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>YMAAT — Tizimga ulanish uchun ariza</title>
+    
+    <!-- Telegram WebApp SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+    <!-- Mobile Console (Debug qilish uchun Eruda plagini) -->
+    <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
+    <script>eruda.init();</script>
+
     <style>
         :root {
             --primary-color: #1b365d;
@@ -275,6 +282,10 @@
         .btn-primary:hover {
             background: var(--primary-hover);
         }
+        .btn-primary:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
         .btn-secondary {
             background: #e5e7eb;
             color: var(--text-main);
@@ -492,7 +503,7 @@
 
             <div class="btn-container">
                 <button type="button" class="btn btn-secondary" onclick="prevStep(5)">&larr; O'zgartirish</button>
-                <button type="button" class="btn btn-primary" onclick="submitAriza()">Ariza topshirish &check;</button>
+                <button type="button" class="btn btn-primary" id="submitBtn" onclick="submitAriza()">Ariza topshirish &check;</button>
             </div>
         </div>
 
@@ -510,6 +521,18 @@
 </div>
 
 <script>
+    // ==========================================
+    // ⚙️ BACKEND TUNNEL URL MANZILINGIZNI YOZING
+    // ==========================================
+    // localtunnel yoki ngrok'dan olgan havolangizni shu yerga qo'ying:
+    const BACKEND_URL = 'https://funny-cats-jump.loca.lt'; 
+
+    // Telegram Mini App tayyorgarligi
+    if (window.Telegram && window.Telegram.WebApp) {
+        window.Telegram.WebApp.ready();
+        window.Telegram.WebApp.expand(); // To'liq ekranda ochish
+    }
+
     let currentStep = 1;
     let uploadedFile = null;
 
@@ -592,7 +615,11 @@
         `;
     }
 
-    function submitAriza() {
+    async function submitAriza() {
+        const submitBtn = document.getElementById('submitBtn');
+        submitBtn.disabled = true;
+        submitBtn.innerText = "Yuborilmoqda...";
+
         // 1. Formadagi barcha ma'lumotlarni yig'amiz
         const formData = {
             tashkilotNomi: document.getElementById('tashkilotNomi').value,
@@ -608,30 +635,36 @@
             qoshimchaMatn: document.getElementById('qoshimchaMatn').value
         };
 
-        // 2. Java Backend'ga yuborish (Agar ngrok ishlatayotgan bo'lsangiz 'http://localhost:8080' o'rniga ngrok havolasini yozing)
-        fetch('http://localhost:8080/api/ariza/submit', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(formData)
-        })
-        .then(response => {
+        try {
+            // 2. Java Backend'ga yuborish
+            const response = await fetch(`${BACKEND_URL}/api/ariza/submit`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Bypass-Tunnel-Remainder': 'true' // Localtunnel cheklovini aylanib o'tish uchun
+                },
+                body: JSON.stringify(formData)
+            });
+
             if (response.ok) {
                 console.log("Bazaga muvaffaqiyatli yuborildi!");
+                
+                // 3. Ekranni o'zgartirish (Muvaffaqiyat oynasi)
+                document.getElementById('arizaForm').style.display = 'none';
+                document.getElementById('stepperBar').style.display = 'none';
+                document.getElementById('mainTitleBlock').style.display = 'none';
+                document.getElementById('successScreen').style.display = 'block';
             } else {
-                console.error("Server xatolik qaytardi");
+                alert("Serverda xatolik yuz berdi (Status: " + response.status + ")");
+                submitBtn.disabled = false;
+                submitBtn.innerText = "Ariza topshirish ✓";
             }
-        })
-        .catch(error => {
+        } catch (error) {
             console.error("Tarmoq xatoligi:", error);
-        });
-
-        // 3. Ekranni o'zgartirish (Muvaffaqiyat oynasi)
-        document.getElementById('arizaForm').style.display = 'none';
-        document.getElementById('stepperBar').style.display = 'none';
-        document.getElementById('mainTitleBlock').style.display = 'none';
-        document.getElementById('successScreen').style.display = 'block';
+            alert("Serverga ulanishda xatolik! Tunnel (localtunnel/ngrok) yonikligini tekshiring.");
+            submitBtn.disabled = false;
+            submitBtn.innerText = "Ariza topshirish ✓";
+        }
     }
 
     function closeWebApp() {
