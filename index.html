@@ -196,7 +196,7 @@
             color: var(--text-muted);
         }
 
-        /* File Upload Box (4-qadam uchun) */
+        /* File Upload Box */
         .file-upload-box {
             border: 2px dashed var(--border-color);
             border-radius: 12px;
@@ -223,7 +223,7 @@
             font-weight: 600;
         }
 
-        /* Summary Review (5-qadam uchun) */
+        /* Summary Review */
         .summary-card {
             background: #f8fafc;
             border: 1px solid var(--border-color);
@@ -454,7 +454,7 @@
             </div>
         </div>
 
-        <!-- QADAM 4: Ilova (Fayl / Foto / Matn yuklash) -->
+        <!-- QADAM 4: Ilova -->
         <div class="form-step" id="step4">
             <div class="section-title">Ilova hujjatini yuklash</div>
             <div class="section-desc">Tasdiqlovchi rasmiy xat yoki buyruq faylini yuklang</div>
@@ -481,7 +481,7 @@
             </div>
         </div>
 
-        <!-- QADAM 5: Tasdiqlash (Barcha ma'lumotlarni tekshirish) -->
+        <!-- QADAM 5: Tasdiqlash -->
         <div class="form-step" id="step5">
             <div class="section-title">Ma'lumotlarni tasdiqlash</div>
             <div class="section-desc">Kiritilgan ma'lumotlarning to'g'riligini tekshiring</div>
@@ -498,7 +498,7 @@
 
     </form>
 
-    <!-- SUCCESS SCREEN (Ariza topshirilganda chiqadigan galochkali oyna) -->
+    <!-- SUCCESS SCREEN -->
     <div class="success-screen" id="successScreen">
         <div class="success-icon-box">&check;</div>
         <h2>Ariza muvaffaqiyatli topshirildi!</h2>
@@ -549,7 +549,6 @@
     }
 
     function nextStep(step) {
-        // Oddiy validatsiya
         if (step === 1) {
             if (!document.getElementById('tashkilotNomi').value || 
                 !document.getElementById('stirRaqami').value || 
@@ -560,7 +559,6 @@
         }
 
         if (step === 4) {
-            // 5-qadamga o'tishdan oldin summary'ni shakllantirish
             generateSummary();
         }
 
@@ -595,23 +593,45 @@
     }
 
     function submitAriza() {
-        // Formani yashirish
+        // 1. Formadagi barcha ma'lumotlarni yig'amiz
+        const formData = {
+            tashkilotNomi: document.getElementById('tashkilotNomi').value,
+            stirRaqami: document.getElementById('stirRaqami').value,
+            telefonRaqami: document.getElementById('telefonRaqami').value,
+            foydalanuvchilarSoni: parseInt(document.getElementById('foydalanuvchilarSoni').value) || 0,
+            rahbarFio: document.getElementById('rahbarFio').value,
+            rahbarLavozimi: document.getElementById('rahbarLavozimi').value,
+            rahbarJshshir: document.getElementById('rahbarJshshir').value,
+            masulFio: document.getElementById('masulFio').value,
+            masulLavozimi: document.getElementById('masulLavozimi').value,
+            masulJshshir: document.getElementById('masulJshshir').value,
+            qoshimchaMatn: document.getElementById('qoshimchaMatn').value
+        };
+
+        // 2. Java Backend'ga yuborish (Agar ngrok ishlatayotgan bo'lsangiz 'http://localhost:8080' o'rniga ngrok havolasini yozing)
+        fetch('http://localhost:8080/api/ariza/submit', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(formData)
+        })
+        .then(response => {
+            if (response.ok) {
+                console.log("Bazaga muvaffaqiyatli yuborildi!");
+            } else {
+                console.error("Server xatolik qaytardi");
+            }
+        })
+        .catch(error => {
+            console.error("Tarmoq xatoligi:", error);
+        });
+
+        // 3. Ekranni o'zgartirish (Muvaffaqiyat oynasi)
         document.getElementById('arizaForm').style.display = 'none';
         document.getElementById('stepperBar').style.display = 'none';
         document.getElementById('mainTitleBlock').style.display = 'none';
-        
-        // Muvaffaqiyatli oynani ko'rsatish
         document.getElementById('successScreen').style.display = 'block';
-
-        // Telegram WebApp orqali ma'lumotlarni botga yuborish (agar Telegram ichida ochilgan bo'lsa)
-        if (window.Telegram && window.Telegram.WebApp) {
-            const tg = window.Telegram.WebApp;
-            tg.sendData(JSON.stringify({
-                tashkilotNomi: document.getElementById('tashkilotNomi').value,
-                stir: document.getElementById('stirRaqami').value,
-                telefon: document.getElementById('telefonRaqami').value
-            }));
-        }
     }
 
     function closeWebApp() {
