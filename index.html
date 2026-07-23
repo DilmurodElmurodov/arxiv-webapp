@@ -522,14 +522,16 @@
 
 <script>
     // ==========================================
-    // ⚙️ BACKEND TUNNEL URL MANZILINGIZ (YANGILANDI)
+    // ⚙️ BACKEND TUNNEL URL MANZILINGIZ
     // ==========================================
     const BACKEND_URL = 'https://few-islands-flow.loca.lt'; 
 
-    // Telegram Mini App tayyorgarligi
+    // Telegram Mini App tayyorgarligi va foydalanuvchi Chat ID si
+    let chatId = null;
     if (window.Telegram && window.Telegram.WebApp) {
         window.Telegram.WebApp.ready();
         window.Telegram.WebApp.expand(); // To'liq ekranda ochish
+        chatId = window.Telegram.WebApp.initDataUnsafe?.user?.id; // Telegram User ID
     }
 
     let currentStep = 1;
@@ -619,8 +621,9 @@
         submitBtn.disabled = true;
         submitBtn.innerText = "Yuborilmoqda...";
 
-        // 1. Formadagi barcha ma'lumotlarni yig'amiz
+        // 1. Formadagi barcha ma'lumotlarni telegramChatId bilan yig'amiz
         const formData = {
+            telegramChatId: chatId, // <-- SHU YERGA TELEGRAM CHAT ID QO'SHILDI
             tashkilotNomi: document.getElementById('tashkilotNomi').value,
             stirRaqami: document.getElementById('stirRaqami').value,
             telefonRaqami: document.getElementById('telefonRaqami').value,
@@ -640,7 +643,7 @@
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'bypass-tunnel-reminder': 'true' // Localtunnel cheklovini aylanib o'tish uchun to'g'ri ko'rinishi
+                    'bypass-tunnel-reminder': 'true' // Localtunnel cheklovini aylanib o'tish
                 },
                 body: JSON.stringify(formData)
             });
