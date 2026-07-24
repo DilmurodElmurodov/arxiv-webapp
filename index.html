@@ -53,7 +53,6 @@
             position: relative;
         }
 
-        /* Header Logo */
         .brand-header {
             display: flex;
             justify-content: center;
@@ -88,7 +87,6 @@
             color: var(--text-muted);
         }
 
-        /* Steps Bar */
         .steps-container {
             display: flex;
             justify-content: space-between;
@@ -146,7 +144,6 @@
             font-weight: 700;
         }
 
-        /* Form Sections */
         .form-step {
             display: none;
         }
@@ -203,7 +200,6 @@
             color: var(--text-muted);
         }
 
-        /* File Upload Box */
         .file-upload-box {
             border: 2px dashed var(--border-color);
             border-radius: 12px;
@@ -230,7 +226,6 @@
             font-weight: 600;
         }
 
-        /* Summary Review */
         .summary-card {
             background: #f8fafc;
             border: 1px solid var(--border-color);
@@ -259,7 +254,6 @@
             text-align: right;
         }
 
-        /* Buttons */
         .btn-container {
             display: flex;
             gap: 10px;
@@ -301,7 +295,6 @@
             margin-top: 16px;
         }
 
-        /* Success Screen */
         .success-screen {
             display: none;
             text-align: center;
@@ -336,7 +329,6 @@
 <body>
 
 <div class="container">
-    <!-- Brand Header -->
     <div class="brand-header">
         <div class="brand-badge">
             🏢 YMAAT
@@ -348,7 +340,6 @@
         <p>Yagona milliy arxiv axborot tizimi</p>
     </div>
 
-    <!-- 5 Qadamlik Stepper -->
     <div class="steps-container" id="stepperBar">
         <div class="step-item active" id="sIndicator1">
             <div class="step-circle">1</div>
@@ -372,10 +363,8 @@
         </div>
     </div>
 
-    <!-- FORMMA -->
     <form id="arizaForm">
-        
-        <!-- QADAM 1: Tashkilot -->
+        <!-- QADAM 1 -->
         <div class="form-step active" id="step1">
             <div class="section-title">Tashkilot to'g'risida</div>
             <div class="section-desc">Ariza beruvchi davlat organi yoki tashkiloti</div>
@@ -409,7 +398,7 @@
             </div>
         </div>
 
-        <!-- QADAM 2: Rahbar -->
+        <!-- QADAM 2 -->
         <div class="form-step" id="step2">
             <div class="section-title">Rahbar ma'lumotlari</div>
             <div class="section-desc">Tashkilot rahbarining shaxsiy ma'lumotlari</div>
@@ -438,7 +427,7 @@
             </div>
         </div>
 
-        <!-- QADAM 3: Mas'ul -->
+        <!-- QADAM 3 -->
         <div class="form-step" id="step3">
             <div class="section-title">Mas'ul xodim ma'lumotlari</div>
             <div class="section-desc">Tizim bilan ishlaydigan mas'ul shaxs</div>
@@ -464,7 +453,7 @@
             </div>
         </div>
 
-        <!-- QADAM 4: Ilova -->
+        <!-- QADAM 4 -->
         <div class="form-step" id="step4">
             <div class="section-title">Ilova hujjatini yuklash</div>
             <div class="section-desc">Tasdiqlovchi rasmiy xat yoki buyruq faylini yuklang</div>
@@ -491,24 +480,20 @@
             </div>
         </div>
 
-        <!-- QADAM 5: Tasdiqlash -->
+        <!-- QADAM 5 -->
         <div class="form-step" id="step5">
             <div class="section-title">Ma'lumotlarni tasdiqlash</div>
             <div class="section-desc">Kiritilgan ma'lumotlarning to'g'riligini tekshiring</div>
 
-            <div class="summary-card" id="summaryContainer">
-                <!-- JavaScript orqali to'ldiriladi -->
-            </div>
+            <div class="summary-card" id="summaryContainer"></div>
 
             <div class="btn-container">
                 <button type="button" class="btn btn-secondary" onclick="prevStep(5)">&larr; O'zgartirish</button>
                 <button type="button" class="btn btn-primary" id="submitBtn" onclick="submitAriza()">Ariza topshirish &check;</button>
             </div>
         </div>
-
     </form>
 
-    <!-- SUCCESS SCREEN -->
     <div class="success-screen" id="successScreen">
         <div class="success-icon-box">&check;</div>
         <h2>Ariza muvaffaqiyatli topshirildi!</h2>
@@ -520,10 +505,10 @@
 </div>
 
 <script>
-    // ==========================================
-    // ⚙️ BACKEND TUNNEL URL MANZILINGIZ
-    // ==========================================
-    const BACKEND_URL = 'https://my-ariza-app.loca.lt'; 
+    // =========================================================
+    // ⚙️ BU YERGA HOZIRGI ISHLAYOTGAN LOCAL TUNNEL URL'INGIZNI QO'YING
+    // =========================================================
+    const BACKEND_URL = 'https://dilmurod-api.loca.lt'; 
 
     let chatId = null;
     if (window.Telegram && window.Telegram.WebApp) {
@@ -535,7 +520,6 @@
     let currentStep = 1;
     let selectedFileObject = null;
 
-    // Counterlar uchun event listenerlar
     document.getElementById('stirRaqami').addEventListener('input', (e) => {
         document.getElementById('stirCounter').innerText = e.target.value.length + '/9';
     });
@@ -569,7 +553,6 @@
     }
 
     function nextStep(step) {
-        // Validatsiyalar
         if (step === 1) {
             if (!document.getElementById('tashkilotNomi').value.trim() || 
                 !document.getElementById('stirRaqami').value.trim() || 
@@ -654,7 +637,8 @@
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'bypass-tunnel-reminder': 'true'
+                    'Bypass-Tunnel-Reminder': 'true',
+                    'ngrok-skip-browser-warning': 'true'
                 },
                 body: JSON.stringify(formData)
             });
@@ -665,13 +649,13 @@
                 document.getElementById('mainTitleBlock').style.display = 'none';
                 document.getElementById('successScreen').style.display = 'block';
             } else {
-                alert("Serverda xatolik yuz berdi (Status: " + response.status + ")");
+                alert("Server xatosi (Status: " + response.status + "). Bekend ishlayotganini va Controller manzilini tekshiring.");
                 submitBtn.disabled = false;
                 submitBtn.innerText = "Ariza topshirish ✓";
             }
         } catch (error) {
-            console.error("Tarmoq xatoligi:", error);
-            alert("Serverga ulanishda xatolik! Localtunnel va backend ishlab turganini tekshiring.");
+            console.error("Fetch Tarmoq Xatosi:", error);
+            alert("Ulanish xatosi (TypeError)! Backend o'chiq yoki Cors/Localtunnel bloklayapti. Eruda konsolini ko'ring.");
             submitBtn.disabled = false;
             submitBtn.innerText = "Ariza topshirish ✓";
         }
