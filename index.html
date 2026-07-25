@@ -506,7 +506,7 @@
 
 <script>
     // =========================================================
-    // ⚙️ BU YERGA HOZIRGI ISHLAYOTGAN LOCAL TUNNEL URL'INGIZNI QO'YING
+    // ⚙️ BU YERGA TERMINAL BERGAN LOCALTUNNEL URL'INGIZNI QO'YING
     // =========================================================
     const BACKEND_URL = 'https://dilmurod-api.loca.lt'; 
 
@@ -617,7 +617,8 @@
         submitBtn.disabled = true;
         submitBtn.innerText = "Yuborilmoqda...";
 
-        const formData = {
+        // Ob'ekt yig'ish
+        const arizaData = {
             telegramChatId: chatId,
             tashkilotNomi: document.getElementById('tashkilotNomi').value,
             stirRaqami: document.getElementById('stirRaqami').value,
@@ -633,15 +634,32 @@
         };
 
         try {
-            const response = await fetch(`${BACKEND_URL}/api/ariza/submit`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Bypass-Tunnel-Reminder': 'true',
-                    'ngrok-skip-browser-warning': 'true'
-                },
-                body: JSON.stringify(formData)
-            });
+            let response;
+
+            // Agar fayl tanlangan bo'lsa Multipart/Form-Data ko'rinishida yuboriladi
+            if (selectedFileObject) {
+                const formData = new FormData();
+                formData.append("dto", new Blob([JSON.stringify(arizaData)], { type: "application/json" }));
+                formData.append("file", selectedFileObject);
+
+                response = await fetch(`${BACKEND_URL}/api/ariza/submit`, {
+                    method: 'POST',
+                    headers: {
+                        'Bypass-Tunnel-Reminder': 'true'
+                    },
+                    body: formData
+                });
+            } else {
+                // Faylsiz bo'lsa oddiy JSON
+                response = await fetch(`${BACKEND_URL}/api/ariza/submit`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Bypass-Tunnel-Reminder': 'true'
+                    },
+                    body: JSON.stringify(arizaData)
+                });
+            }
 
             if (response.ok) {
                 document.getElementById('arizaForm').style.display = 'none';
