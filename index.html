@@ -377,19 +377,19 @@
             <div class="form-group">
                 <label>Tashkilot STIR raqami *</label>
                 <div class="input-wrapper">
-                    <input type="text" class="form-control" id="stirRaqami" placeholder="123456789" maxlength="9" required>
+                    <input type="text" class="form-control" id="stirRaqami" placeholder="123456789" maxlength="9" inputmode="numeric" required>
                     <span class="input-counter" id="stirCounter">0/9</span>
                 </div>
             </div>
 
             <div class="form-group">
                 <label>Telefon raqami *</label>
-                <input type="text" class="form-control" id="telefonRaqami" placeholder="+998 90 123 45 67" required>
+                <input type="tel" class="form-control" id="telefonRaqami" placeholder="+998 90 123 45 67" required>
             </div>
 
             <div class="form-group">
                 <label>Tizimdan foydalanuvchilar soni *</label>
-                <input type="number" class="form-control" id="foydalanuvchilarSoni" placeholder="5" required>
+                <input type="number" class="form-control" id="foydalanuvchilarSoni" placeholder="5" min="1" required>
                 <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Tizimda ishlaydigan xodimlar soni</div>
             </div>
 
@@ -416,7 +416,7 @@
             <div class="form-group">
                 <label>Rahbar JSHSHIR *</label>
                 <div class="input-wrapper">
-                    <input type="text" class="form-control" id="rahbarJshshir" placeholder="14 ta raqam" maxlength="14">
+                    <input type="text" class="form-control" id="rahbarJshshir" placeholder="14 ta raqam" maxlength="14" inputmode="numeric">
                     <span class="input-counter" id="jshshirCounter">0/14</span>
                 </div>
             </div>
@@ -444,7 +444,10 @@
 
             <div class="form-group">
                 <label>Mas'ul JSHSHIR *</label>
-                <input type="text" class="form-control" id="masulJshshir" placeholder="14 ta raqam" maxlength="14">
+                <div class="input-wrapper">
+                    <input type="text" class="form-control" id="masulJshshir" placeholder="14 ta raqam" maxlength="14" inputmode="numeric">
+                    <span class="input-counter" id="masulJshshirCounter">0/14</span>
+                </div>
             </div>
 
             <div class="btn-container">
@@ -466,7 +469,7 @@
                     <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">PNG, JPG, PDF (Maks: 10MB)</div>
                     <div class="file-name-display" id="fileNameDisplay">Fayl tanlanmagan</div>
                 </div>
-                <input type="file" id="fileInput" onchange="handleFileSelect(event)">
+                <input type="file" id="fileInput" accept=".pdf,.png,.jpg,.jpeg,.doc,.docx" onchange="handleFileSelect(event)">
             </div>
 
             <div class="form-group">
@@ -506,7 +509,7 @@
 
 <script>
     // =========================================================
-    // ⚙️ TERMINAL BERGAN TUNNEL HAVOLASINI SHU YERGA QO'YING
+    // ⚙️ BACKEND TUNNEL URL (Pinggy yoki Localtunnel linkini qo'ying)
     // =========================================================
     const BACKEND_URL = 'https://chilly-toys-drum.loca.lt'; 
 
@@ -520,17 +523,30 @@
     let currentStep = 1;
     let selectedFileObject = null;
 
-    document.getElementById('stirRaqami').addEventListener('input', (e) => {
-        document.getElementById('stirCounter').innerText = e.target.value.length + '/9';
-    });
+    // Faqat raqam kiritish va counter funksiyalari
+    function setupNumericInput(inputId, counterId, maxLength) {
+        const input = document.getElementById(inputId);
+        input.addEventListener('input', (e) => {
+            e.target.value = e.target.value.replace(/\D/g, ''); // Faqat raqam
+            if(counterId) {
+                document.getElementById(counterId).innerText = e.target.value.length + '/' + maxLength;
+            }
+        });
+    }
 
-    document.getElementById('rahbarJshshir').addEventListener('input', (e) => {
-        document.getElementById('jshshirCounter').innerText = e.target.value.length + '/14';
-    });
+    setupNumericInput('stirRaqami', 'stirCounter', 9);
+    setupNumericInput('rahbarJshshir', 'jshshirCounter', 14);
+    setupNumericInput('masulJshshir', 'masulJshshirCounter', 14);
 
     function handleFileSelect(event) {
         const file = event.target.files[0];
         if (file) {
+            // Fayl hajmini tekshirish (10MB limit)
+            if (file.size > 10 * 1024 * 1024) {
+                alert("Fayl hajmi 10MB dan oshmasligi kerak!");
+                event.target.value = "";
+                return;
+            }
             selectedFileObject = file;
             document.getElementById('fileNameDisplay').innerText = "Tanlandi: " + file.name;
         }
@@ -554,26 +570,41 @@
 
     function nextStep(step) {
         if (step === 1) {
+            const stir = document.getElementById('stirRaqami').value.trim();
             if (!document.getElementById('tashkilotNomi').value.trim() || 
-                !document.getElementById('stirRaqami').value.trim() || 
+                !stir || 
                 !document.getElementById('telefonRaqami').value.trim()) {
                 alert("Iltimos, Tashkilot ma'lumotlarini to'liq kiriting!");
+                return;
+            }
+            if (stir.length !== 9) {
+                alert("STIR raqami 9 ta raqamdan iborat bo'lishi kerak!");
                 return;
             }
         }
         
         if (step === 2) {
+            const jshshir = document.getElementById('rahbarJshshir').value.trim();
             if (!document.getElementById('rahbarFio').value.trim() || 
                 !document.getElementById('rahbarLavozimi').value.trim()) {
                 alert("Iltimos, Rahbar ma'lumotlarini to'liq kiriting!");
                 return;
             }
+            if (jshshir && jshshir.length !== 14) {
+                alert("Rahbar JSHSHIR 14 ta raqam bo'lishi kerak!");
+                return;
+            }
         }
 
         if (step === 3) {
+            const masulJshshir = document.getElementById('masulJshshir').value.trim();
             if (!document.getElementById('masulFio').value.trim() || 
                 !document.getElementById('masulLavozimi').value.trim()) {
                 alert("Iltimos, Mas'ul xodim ma'lumotlarini to'liq kiriting!");
+                return;
+            }
+            if (masulJshshir && masulJshshir.length !== 14) {
+                alert("Mas'ul xodim JSHSHIR 14 ta raqam bo'lishi kerak!");
                 return;
             }
         }
@@ -634,6 +665,9 @@
 
         try {
             let response;
+            const headers = {
+                'ngrok-skip-browser-warning': 'true' // Barcha tunnel turlarida ogohlantirishni o'tkazib yuborish uchun
+            };
 
             if (selectedFileObject) {
                 const formData = new FormData();
@@ -642,18 +676,14 @@
 
                 response = await fetch(`${BACKEND_URL}/api/ariza/submit`, {
                     method: 'POST',
-                    headers: {
-                        'Bypass-Tunnel-Reminder': 'true'
-                    },
+                    headers: headers,
                     body: formData
                 });
             } else {
+                headers['Content-Type'] = 'application/json';
                 response = await fetch(`${BACKEND_URL}/api/ariza/submit`, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Bypass-Tunnel-Reminder': 'true'
-                    },
+                    headers: headers,
                     body: JSON.stringify(arizaData)
                 });
             }
@@ -664,13 +694,13 @@
                 document.getElementById('mainTitleBlock').style.display = 'none';
                 document.getElementById('successScreen').style.display = 'block';
             } else {
-                alert("Server xatosi (Status: " + response.status + "). Bekend ishlayotganini va Controller manzilini tekshiring.");
+                alert("Server xatosi (Status: " + response.status + "). Bekend Controller manzilini tekshiring.");
                 submitBtn.disabled = false;
                 submitBtn.innerText = "Ariza topshirish ✓";
             }
         } catch (error) {
             console.error("Fetch Tarmoq Xatosi:", error);
-            alert("Ulanish xatosi (TypeError)! Backend o'chiq yoki Tunnel bloklayapti. Eruda konsolini ko'ring.");
+            alert("Ulanish xatosi! Backend o'chiq yoki Tunnel bloklayapti. Eruda konsolini ko'ring.");
             submitBtn.disabled = false;
             submitBtn.innerText = "Ariza topshirish ✓";
         }
