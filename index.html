@@ -509,9 +509,9 @@
 
 <script>
     // =========================================================
-    // ⚙️ BACKEND TUNNEL URL (Pinggy yoki Localtunnel linkini qo'ying)
+    // ⚙️ BACKEND TUNNEL URL (Ngrok manzilingiz ulandi)
     // =========================================================
-    const BACKEND_URL = 'https://chilly-toys-drum.loca.lt'; 
+    const BACKEND_URL = 'https://profound-womanless-battle.ngrok-free.dev'; 
 
     let chatId = null;
     if (window.Telegram && window.Telegram.WebApp) {
@@ -666,7 +666,7 @@
         try {
             let response;
             const headers = {
-                'ngrok-skip-browser-warning': 'true' // Barcha tunnel turlarida ogohlantirishni o'tkazib yuborish uchun
+                'ngrok-skip-browser-warning': 'true' // Ngrok ogohlantirish sahifasini aylanib o'tish uchun
             };
 
             if (selectedFileObject) {
