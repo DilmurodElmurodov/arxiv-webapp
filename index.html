@@ -506,9 +506,9 @@
 
 <script>
     // =========================================================
-    // ⚙️ BU YERGA TERMINAL BERGAN LOCALTUNNEL URL'INGIZNI QO'YING
+    // ⚙️ TERMINAL BERGAN TUNNEL HAVOLASINI SHU YERGA QO'YING
     // =========================================================
-    const BACKEND_URL = 'https://dilmurod-api.loca.lt'; 
+    const BACKEND_URL = 'https://chilly-toys-drum.loca.lt'; 
 
     let chatId = null;
     if (window.Telegram && window.Telegram.WebApp) {
@@ -617,7 +617,6 @@
         submitBtn.disabled = true;
         submitBtn.innerText = "Yuborilmoqda...";
 
-        // Ob'ekt yig'ish
         const arizaData = {
             telegramChatId: chatId,
             tashkilotNomi: document.getElementById('tashkilotNomi').value,
@@ -636,7 +635,6 @@
         try {
             let response;
 
-            // Agar fayl tanlangan bo'lsa Multipart/Form-Data ko'rinishida yuboriladi
             if (selectedFileObject) {
                 const formData = new FormData();
                 formData.append("dto", new Blob([JSON.stringify(arizaData)], { type: "application/json" }));
@@ -650,7 +648,6 @@
                     body: formData
                 });
             } else {
-                // Faylsiz bo'lsa oddiy JSON
                 response = await fetch(`${BACKEND_URL}/api/ariza/submit`, {
                     method: 'POST',
                     headers: {
@@ -673,7 +670,7 @@
             }
         } catch (error) {
             console.error("Fetch Tarmoq Xatosi:", error);
-            alert("Ulanish xatosi (TypeError)! Backend o'chiq yoki Cors/Localtunnel bloklayapti. Eruda konsolini ko'ring.");
+            alert("Ulanish xatosi (TypeError)! Backend o'chiq yoki Tunnel bloklayapti. Eruda konsolini ko'ring.");
             submitBtn.disabled = false;
             submitBtn.innerText = "Ariza topshirish ✓";
         }
