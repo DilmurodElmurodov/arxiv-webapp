@@ -511,7 +511,65 @@
     // =========================================================
     // ⚙️ BACKEND TUNNEL URL (Ngrok manzilingiz ulandi)
     // =========================================================
-    const BACKEND_URL = 'https://profound-womanless-battle.ngrok-free.dev'; 
+    const BACKEND_URL = 'https://profound-womanless-battle.ngrok-free.dev';
+    const SUBMIT_URL = `${BACKEND_URL}/api/ariza/submit`;
+    const REQUEST_TIMEOUT_MS = 20000;
+    const NETWORK_RETRIES = 2;
+    const RETRY_DELAY_MS = 1500;
+
+    if (!/^https:\/\//.test(BACKEND_URL)) {
+        console.error("BACKEND_URL HTTPS bo'lishi shart (Telegram Mini App talabi):", BACKEND_URL);
+    }
+
+    function notify(message) {
+        const tg = window.Telegram && window.Telegram.WebApp;
+        if (tg && typeof tg.showAlert === 'function') {
+            try { tg.showAlert(message); return; } catch (e) { }
+        }
+        alert(message);
+    }
+
+    function sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    async function fetchWithTimeout(url, options, timeoutMs) {
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), timeoutMs);
+        try {
+            return await fetch(url, { ...options, signal: controller.signal });
+        } finally {
+            clearTimeout(timer);
+        }
+    }
+
+    // Retries only when no response ever arrived (connection refused, DNS, tunnel down).
+    // A timeout or an HTTP error is not retried automatically: the server may already have stored the ariza.
+    async function postWithRetry(url, options) {
+        let attempt = 0;
+        for (;;) {
+            const startedAt = Date.now();
+            try {
+                const response = await fetchWithTimeout(url, options, REQUEST_TIMEOUT_MS);
+                console.info(`[ariza] POST ${url} -> ${response.status} ${response.statusText} (${Date.now() - startedAt} ms, attempt ${attempt + 1})`);
+                return response;
+            } catch (error) {
+                const elapsed = Date.now() - startedAt;
+                if (error && error.name === 'AbortError') {
+                    console.error(`[ariza] POST ${url} timed out after ${elapsed} ms (attempt ${attempt + 1})`);
+                    throw new Error('TIMEOUT');
+                }
+                console.error(`[ariza] POST ${url} network failure after ${elapsed} ms (attempt ${attempt + 1}):`,
+                    error && error.name, error && error.message, 'online=' + navigator.onLine);
+                if (attempt >= NETWORK_RETRIES) {
+                    throw new Error('NETWORK');
+                }
+                attempt++;
+                await sleep(RETRY_DELAY_MS * attempt);
+            }
+        }
+    }
+
 
     let chatId = null;
     if (window.Telegram && window.Telegram.WebApp) {
@@ -663,46 +721,64 @@
             qoshimchaMatn: document.getElementById('qoshimchaMatn').value
         };
 
-        try {
-            let response;
-            const headers = {
-                'ngrok-skip-browser-warning': 'true' // Ngrok ogohlantirish sahifasini aylanib o'tish uchun
-            };
+        const headers = { 'ngrok-skip-browser-warning': 'true' };
+        let options;
+        if (selectedFileObject) {
+            const formData = new FormData();
+            formData.append("dto", new Blob([JSON.stringify(arizaData)], { type: "application/json" }));
+            formData.append("file", selectedFileObject);
+            options = { method: 'POST', headers, body: formData };
+        } else {
+            headers['Content-Type'] = 'application/json';
+            options = { method: 'POST', headers, body: JSON.stringify(arizaData) };
+        }
 
-            if (selectedFileObject) {
-                const formData = new FormData();
-                formData.append("dto", new Blob([JSON.stringify(arizaData)], { type: "application/json" }));
-                formData.append("file", selectedFileObject);
-
-                response = await fetch(`${BACKEND_URL}/api/ariza/submit`, {
-                    method: 'POST',
-                    headers: headers,
-                    body: formData
-                });
-            } else {
-                headers['Content-Type'] = 'application/json';
-                response = await fetch(`${BACKEND_URL}/api/ariza/submit`, {
-                    method: 'POST',
-                    headers: headers,
-                    body: JSON.stringify(arizaData)
-                });
-            }
-
-            if (response.ok) {
-                document.getElementById('arizaForm').style.display = 'none';
-                document.getElementById('stepperBar').style.display = 'none';
-                document.getElementById('mainTitleBlock').style.display = 'none';
-                document.getElementById('successScreen').style.display = 'block';
-            } else {
-                alert("Server xatosi (Status: " + response.status + "). Bekend Controller manzilini tekshiring.");
-                submitBtn.disabled = false;
-                submitBtn.innerText = "Ariza topshirish ✓";
-            }
-        } catch (error) {
-            console.error("Fetch Tarmoq Xatosi:", error);
-            alert("Ulanish xatosi! Backend o'chiq yoki Tunnel bloklayapti. Eruda konsolini ko'ring.");
+        const restoreButton = () => {
             submitBtn.disabled = false;
             submitBtn.innerText = "Ariza topshirish ✓";
+        };
+
+        let response;
+        try {
+            response = await postWithRetry(SUBMIT_URL, options);
+        } catch (error) {
+            restoreButton();
+            if (error.message === 'TIMEOUT') {
+                notify("Server javob bermadi (20 soniya). Internetni tekshirib, qayta urinib ko'ring.");
+            } else {
+                notify("Serverga ulanib bo'lmadi. Internet aloqasini tekshiring yoki birozdan so'ng qayta urinib ko'ring.");
+            }
+            return;
+        }
+
+        if (response.ok) {
+            document.getElementById('arizaForm').style.display = 'none';
+            document.getElementById('stepperBar').style.display = 'none';
+            document.getElementById('mainTitleBlock').style.display = 'none';
+            document.getElementById('successScreen').style.display = 'block';
+            return;
+        }
+
+        let detail = '';
+        try {
+            const raw = await response.text();
+            try {
+                const problem = JSON.parse(raw);
+                detail = problem.detail || problem.title || raw;
+            } catch (e) {
+                detail = raw;
+            }
+        } catch (e) {
+            detail = '';
+        }
+        console.error(`[ariza] server rejected the submission: HTTP ${response.status} ${response.statusText}`, detail);
+        restoreButton();
+        if (response.status >= 400 && response.status < 500 && detail) {
+            notify(detail);
+        } else if (response.status >= 500) {
+            notify("Serverda xatolik yuz berdi (" + response.status + "). Birozdan so'ng qayta urinib ko'ring.");
+        } else {
+            notify("Arizani yuborib bo'lmadi (Status: " + response.status + ").");
         }
     }
 
