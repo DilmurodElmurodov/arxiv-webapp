@@ -9,8 +9,6 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
     <!-- Mobile Console (Debug qilish uchun Eruda plagini) -->
-    <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
-    <script>eruda.init();</script>
 
     <style>
         :root {
@@ -511,7 +509,7 @@
     // =========================================================
     // ⚙️ BACKEND TUNNEL URL (Ngrok manzilingiz ulandi)
     // =========================================================
-    const BACKEND_URL = 'https://profound-womanless-battle.ngrok-free.dev';
+    const BACKEND_URL = 'https://adliyaarizabot.servegame.com';
     const SUBMIT_URL = `${BACKEND_URL}/api/ariza/submit`;
     const REQUEST_TIMEOUT_MS = 20000;
     const NETWORK_RETRIES = 2;
@@ -684,20 +682,24 @@
         updateStepper();
     }
 
+    function esc(value) {
+        return String(value).replace(/[&<>"']/g, ch => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[ch]));
+    }
+
     function generateSummary() {
         const container = document.getElementById('summaryContainer');
         container.innerHTML = `
-            <div class="summary-item"><span class="summary-label">Tashkilot nomi:</span><span class="summary-value">${document.getElementById('tashkilotNomi').value}</span></div>
-            <div class="summary-item"><span class="summary-label">STIR:</span><span class="summary-value">${document.getElementById('stirRaqami').value}</span></div>
-            <div class="summary-item"><span class="summary-label">Telefon:</span><span class="summary-value">${document.getElementById('telefonRaqami').value}</span></div>
-            <div class="summary-item"><span class="summary-label">Xodimlar soni:</span><span class="summary-value">${document.getElementById('foydalanuvchilarSoni').value}</span></div>
-            <div class="summary-item"><span class="summary-label">Rahbar FIO:</span><span class="summary-value">${document.getElementById('rahbarFio').value || '-'}</span></div>
-            <div class="summary-item"><span class="summary-label">Rahbar lavozimi:</span><span class="summary-value">${document.getElementById('rahbarLavozimi').value || '-'}</span></div>
-            <div class="summary-item"><span class="summary-label">Rahbar JSHSHIR:</span><span class="summary-value">${document.getElementById('rahbarJshshir').value || '-'}</span></div>
-            <div class="summary-item"><span class="summary-label">Mas'ul FIO:</span><span class="summary-value">${document.getElementById('masulFio').value || '-'}</span></div>
-            <div class="summary-item"><span class="summary-label">Mas'ul lavozimi:</span><span class="summary-value">${document.getElementById('masulLavozimi').value || '-'}</span></div>
-            <div class="summary-item"><span class="summary-label">Mas'ul JSHSHIR:</span><span class="summary-value">${document.getElementById('masulJshshir').value || '-'}</span></div>
-            <div class="summary-item"><span class="summary-label">Yuklangan fayl:</span><span class="summary-value">${selectedFileObject ? selectedFileObject.name : 'Yo\'q'}</span></div>
+            <div class="summary-item"><span class="summary-label">Tashkilot nomi:</span><span class="summary-value">${esc(document.getElementById('tashkilotNomi').value)}</span></div>
+            <div class="summary-item"><span class="summary-label">STIR:</span><span class="summary-value">${esc(document.getElementById('stirRaqami').value)}</span></div>
+            <div class="summary-item"><span class="summary-label">Telefon:</span><span class="summary-value">${esc(document.getElementById('telefonRaqami').value)}</span></div>
+            <div class="summary-item"><span class="summary-label">Xodimlar soni:</span><span class="summary-value">${esc(document.getElementById('foydalanuvchilarSoni').value)}</span></div>
+            <div class="summary-item"><span class="summary-label">Rahbar FIO:</span><span class="summary-value">${esc(document.getElementById('rahbarFio').value || '-')}</span></div>
+            <div class="summary-item"><span class="summary-label">Rahbar lavozimi:</span><span class="summary-value">${esc(document.getElementById('rahbarLavozimi').value || '-')}</span></div>
+            <div class="summary-item"><span class="summary-label">Rahbar JSHSHIR:</span><span class="summary-value">${esc(document.getElementById('rahbarJshshir').value || '-')}</span></div>
+            <div class="summary-item"><span class="summary-label">Mas'ul FIO:</span><span class="summary-value">${esc(document.getElementById('masulFio').value || '-')}</span></div>
+            <div class="summary-item"><span class="summary-label">Mas'ul lavozimi:</span><span class="summary-value">${esc(document.getElementById('masulLavozimi').value || '-')}</span></div>
+            <div class="summary-item"><span class="summary-label">Mas'ul JSHSHIR:</span><span class="summary-value">${esc(document.getElementById('masulJshshir').value || '-')}</span></div>
+            <div class="summary-item"><span class="summary-label">Yuklangan fayl:</span><span class="summary-value">${esc(selectedFileObject ? selectedFileObject.name : 'Yo\'q')}</span></div>
         `;
     }
 
