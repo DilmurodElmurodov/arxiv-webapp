@@ -369,7 +369,7 @@
 
             <div class="form-group">
                 <label>Tashkilot nomi *</label>
-                <input type="text" class="form-control" id="tashkilotNomi" placeholder="Masalan: Adliya vazirligi" required>
+                <input type="text" class="form-control" id="tashkilotNomi" placeholder="Masalan: Adliya vazirligi" maxlength="255" required>
             </div>
 
             <div class="form-group">
@@ -382,12 +382,12 @@
 
             <div class="form-group">
                 <label>Telefon raqami *</label>
-                <input type="tel" class="form-control" id="telefonRaqami" placeholder="+998 90 123 45 67" required>
+                <input type="tel" class="form-control" id="telefonRaqami" placeholder="+998 90 123 45 67" maxlength="25" required>
             </div>
 
             <div class="form-group">
                 <label>Tizimdan foydalanuvchilar soni *</label>
-                <input type="number" class="form-control" id="foydalanuvchilarSoni" placeholder="5" min="1" required>
+                <input type="number" class="form-control" id="foydalanuvchilarSoni" placeholder="5" min="1" max="1000000" required>
                 <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Tizimda ishlaydigan xodimlar soni</div>
             </div>
 
@@ -403,12 +403,12 @@
 
             <div class="form-group">
                 <label>Rahbar F.I.O. *</label>
-                <input type="text" class="form-control" id="rahbarFio" placeholder="F.I.O. ni to'liq kiriting">
+                <input type="text" class="form-control" id="rahbarFio" placeholder="F.I.O. ni to'liq kiriting" maxlength="255">
             </div>
 
             <div class="form-group">
                 <label>Rahbar lavozimi *</label>
-                <input type="text" class="form-control" id="rahbarLavozimi" placeholder="Masalan: Direktor / Boshliq">
+                <input type="text" class="form-control" id="rahbarLavozimi" placeholder="Masalan: Direktor / Boshliq" maxlength="255">
             </div>
 
             <div class="form-group">
@@ -432,12 +432,12 @@
 
             <div class="form-group">
                 <label>Mas'ul xodim F.I.O. *</label>
-                <input type="text" class="form-control" id="masulFio" placeholder="F.I.O. ni to'liq kiriting">
+                <input type="text" class="form-control" id="masulFio" placeholder="F.I.O. ni to'liq kiriting" maxlength="255">
             </div>
 
             <div class="form-group">
                 <label>Mas'ul lavozimi *</label>
-                <input type="text" class="form-control" id="masulLavozimi" placeholder="Masalan: Bo'lim boshlig'i">
+                <input type="text" class="form-control" id="masulLavozimi" placeholder="Masalan: Bo'lim boshlig'i" maxlength="255">
             </div>
 
             <div class="form-group">
@@ -472,7 +472,7 @@
 
             <div class="form-group">
                 <label>Qo'shimcha izoh yoki matn</label>
-                <textarea class="form-control" id="qoshimchaMatn" placeholder="Zarur bo'lsa qo'shimcha ma'lumot yozing..." rows="3"></textarea>
+                <textarea class="form-control" id="qoshimchaMatn" placeholder="Zarur bo'lsa qo'shimcha ma'lumot yozing..." rows="3" maxlength="5000"></textarea>
             </div>
 
             <div class="btn-container">
@@ -569,11 +569,27 @@
     }
 
 
+    // Server-side field rules (mirrored from the backend's Identifiers / ArizaService validation).
+    const PHONE_SHAPE = /^\+?[\d\s()\-.]+$/;
+    const PHONE_MIN_DIGITS = 9;
+    const PHONE_MAX_DIGITS = 15;
+
+    function isValidPhone(value) {
+        const trimmed = (value || '').trim();
+        if (!PHONE_SHAPE.test(trimmed)) return false;
+        const digits = trimmed.replace(/\D/g, '').length;
+        return digits >= PHONE_MIN_DIGITS && digits <= PHONE_MAX_DIGITS;
+    }
+
     let chatId = null;
+    // Signed initData: the backend verifies its HMAC and takes the applicant's Telegram id from it,
+    // so a submission can never be attributed to a different user. Empty outside Telegram.
+    let telegramInitData = '';
     if (window.Telegram && window.Telegram.WebApp) {
         window.Telegram.WebApp.ready();
         window.Telegram.WebApp.expand();
         chatId = window.Telegram.WebApp.initDataUnsafe?.user?.id;
+        telegramInitData = window.Telegram.WebApp.initData || '';
     }
 
     let currentStep = 1;
@@ -635,6 +651,10 @@
             }
             if (stir.length !== 9) {
                 alert("STIR raqami 9 ta raqamdan iborat bo'lishi kerak!");
+                return;
+            }
+            if (!isValidPhone(document.getElementById('telefonRaqami').value)) {
+                alert("Telefon raqami noto'g'ri kiritilgan (9–15 ta raqam, masalan +998 90 123 45 67)!");
                 return;
             }
         }
@@ -724,6 +744,9 @@
         };
 
         const headers = { 'ngrok-skip-browser-warning': 'true' };
+        if (telegramInitData) {
+            headers['X-Telegram-Init-Data'] = telegramInitData;
+        }
         let options;
         if (selectedFileObject) {
             const formData = new FormData();
