@@ -723,6 +723,35 @@
         `;
     }
 
+    // One Idempotency-Key per form content. A second tap, or a retry after a timeout, sends the same
+    // application with the same key, and the server stores it once and answers as it did the first time.
+    // When anything in the form changes it is another application and gets a new key (the server refuses
+    // a key that comes back with different content).
+    let submissionKey = null;
+    let submissionSnapshot = null;
+
+    function newSubmissionKey() {
+        const c = window.crypto;
+        if (c && typeof c.randomUUID === 'function') {
+            return c.randomUUID();
+        }
+        if (c && typeof c.getRandomValues === 'function') {
+            const bytes = new Uint8Array(16);
+            c.getRandomValues(bytes);
+            return Array.from(bytes, b => b.toString(16).padStart(2, '0')).join('');
+        }
+        return 'k' + Date.now().toString(36) + Math.random().toString(36).slice(2, 12) + Math.random().toString(36).slice(2, 12);
+    }
+
+    function submissionKeyFor(arizaData, file) {
+        const snapshot = JSON.stringify(arizaData) + '|' + (file ? [file.name, file.size, file.lastModified].join(':') : '');
+        if (snapshot !== submissionSnapshot) {
+            submissionSnapshot = snapshot;
+            submissionKey = newSubmissionKey();
+        }
+        return submissionKey;
+    }
+
     async function submitAriza() {
         const submitBtn = document.getElementById('submitBtn');
         submitBtn.disabled = true;
@@ -747,6 +776,7 @@
         if (telegramInitData) {
             headers['X-Telegram-Init-Data'] = telegramInitData;
         }
+        headers['Idempotency-Key'] = submissionKeyFor(arizaData, selectedFileObject);
         let options;
         if (selectedFileObject) {
             const formData = new FormData();
@@ -777,6 +807,8 @@
         }
 
         if (response.ok) {
+            submissionKey = null;
+            submissionSnapshot = null;
             document.getElementById('arizaForm').style.display = 'none';
             document.getElementById('stepperBar').style.display = 'none';
             document.getElementById('mainTitleBlock').style.display = 'none';
