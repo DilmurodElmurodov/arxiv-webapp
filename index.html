@@ -511,7 +511,15 @@
     // =========================================================
     const BACKEND_URL = 'https://adliyaarizabot.servegame.com';
     const SUBMIT_URL = `${BACKEND_URL}/api/ariza/submit`;
+    // INT-04: one timer covers the whole request, the upload of the body included. Twenty seconds is plenty for
+    // the form alone, but a 10 MB attachment needs about 4 Mbit/s upstream to fit into it, so on a slow mobile
+    // connection every attempt was aborted in the middle of the upload. With a file the request gets three
+    // minutes (the server's proxy allows ten for a body).
     const REQUEST_TIMEOUT_MS = 20000;
+    const UPLOAD_TIMEOUT_MS = 180000;
+    function timeoutFor(options) {
+        return options && options.body instanceof FormData ? UPLOAD_TIMEOUT_MS : REQUEST_TIMEOUT_MS;
+    }
     const NETWORK_RETRIES = 2;
     const RETRY_DELAY_MS = 1500;
 
@@ -548,7 +556,7 @@
         for (;;) {
             const startedAt = Date.now();
             try {
-                const response = await fetchWithTimeout(url, options, REQUEST_TIMEOUT_MS);
+                const response = await fetchWithTimeout(url, options, timeoutFor(options));
                 console.info(`[ariza] POST ${url} -> ${response.status} ${response.statusText} (${Date.now() - startedAt} ms, attempt ${attempt + 1})`);
                 return response;
             } catch (error) {
@@ -799,7 +807,7 @@
         } catch (error) {
             restoreButton();
             if (error.message === 'TIMEOUT') {
-                notify("Server javob bermadi (20 soniya). Internetni tekshirib, qayta urinib ko'ring.");
+                notify("Server javob bermadi (" + Math.round(timeoutFor(options) / 1000) + " soniya). Internetni tekshirib, qayta urinib ko'ring.");
             } else {
                 notify("Serverga ulanib bo'lmadi. Internet aloqasini tekshiring yoki birozdan so'ng qayta urinib ko'ring.");
             }
